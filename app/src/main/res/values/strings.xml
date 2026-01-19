@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Gestor de Medicamentos</string>
+    <string name="notification_channel_name">Recordatorios de Medicamentos</string>
+    <string name="notification_channel_description">Notificaciones para recordarte tomar tus medicamentos</string>
+    <string name="tomar_medicamento">Es hora de tomar tu medicamento</string>
+    <string name="no_olvides">No olvides tomar:</string>
+</resources>
