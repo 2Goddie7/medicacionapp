@@ -33,13 +33,14 @@
         </activity>
 
         <!-- Receptor de alarmas para notificaciones -->
+        <!-- IMPORTANTE: android:exported="true" permite que el sistema active las alarmas -->
         <receiver
             android:name=".alarm.AlarmReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="com.example.expensetracker.MEDICAMENTO_ALARM" />
+                <action android:name="com.example.medicacionapp.MEDICAMENTO_ALARM" />
             </intent-filter>
         </receiver>
 

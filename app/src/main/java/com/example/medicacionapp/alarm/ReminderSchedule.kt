@@ -52,7 +52,8 @@ class ReminderSchedule(private val context: Context) {
             }
 
             val intent = Intent(context, AlarmReceiver::class.java).apply {
-                action = "com.example.expensetracker.MEDICAMENTO_ALARM"
+                // IMPORTANTE: Cambiar el action para que coincida con el AndroidManifest
+                action = "com.example.medicacionapp.MEDICAMENTO_ALARM"
                 putExtra("medicamento_nombre", medicamento.nombre)
                 putExtra("medicamento_dosis", medicamento.dosis)
                 putExtra("medicamento_id", medicamento.id)
@@ -66,64 +67,36 @@ class ReminderSchedule(private val context: Context) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // Programar alarma exacta que se repite diariamente
+            // IMPORTANTE: Usar setRepeating en lugar de setExactAndAllowWhileIdle para alarmas repetitivas
+            // setExactAndAllowWhileIdle es para alarmas únicas
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
+                alarmManager.setRepeating(
                     AlarmManager.RTC_WAKEUP,
                     calendario.timeInMillis,
+                    AlarmManager.INTERVAL_DAY, // Repetir cada 24 horas
                     pendingIntent
                 )
             } else {
-                alarmManager.setExact(
+                alarmManager.setRepeating(
                     AlarmManager.RTC_WAKEUP,
                     calendario.timeInMillis,
+                    AlarmManager.INTERVAL_DAY,
                     pendingIntent
                 )
             }
-
-            // Para repetición diaria, reprogramar después de cada notificación
-            programarRepeticionDiaria(medicamento, horario, index, calendario.timeInMillis)
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun programarRepeticionDiaria(
-        medicamento: ExpenseEntity,
-        horario: String,
-        index: Int,
-        tiempoInicial: Long
-    ) {
-        val intent = Intent(context, AlarmReceiver::class.java).apply {
-            action = "com.example.expensetracker.MEDICAMENTO_ALARM"
-            putExtra("medicamento_nombre", medicamento.nombre)
-            putExtra("medicamento_dosis", medicamento.dosis)
-            putExtra("medicamento_id", medicamento.id)
-        }
-
-        val requestCode = generarRequestCode(medicamento.id, index)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        // Programar repetición cada 24 horas
-        alarmManager.setRepeating(
-            AlarmManager.RTC_WAKEUP,
-            tiempoInicial,
-            AlarmManager.INTERVAL_DAY,
-            pendingIntent
-        )
-    }
-
     fun cancelarRecordatorios(medicamentoId: Long) {
         // Cancelar hasta 10 horarios posibles por medicamento
         for (index in 0..9) {
             val requestCode = generarRequestCode(medicamentoId, index)
-            val intent = Intent(context, AlarmReceiver::class.java)
+            val intent = Intent(context, AlarmReceiver::class.java).apply {
+                action = "com.example.medicacionapp.MEDICAMENTO_ALARM"
+            }
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
                 requestCode,

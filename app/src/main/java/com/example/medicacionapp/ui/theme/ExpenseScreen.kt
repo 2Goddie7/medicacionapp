@@ -273,7 +273,7 @@ fun TarjetaMedicamento(
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    Divider()
+                    HorizontalDivider()
                     Spacer(modifier = Modifier.height(12.dp))
 
                     // Botones de acción
@@ -393,8 +393,17 @@ fun DialogoMedicamento(
     var nombre by remember { mutableStateOf(medicamento?.nombre ?: "") }
     var descripcion by remember { mutableStateOf(medicamento?.descripcion ?: "") }
     var dosis by remember { mutableStateOf(medicamento?.dosis ?: "") }
-    var frecuencia by remember { mutableStateOf(medicamento?.frecuencia ?: "") }
-    var horarios by remember { mutableStateOf(medicamento?.horarios ?: "") }
+
+    // Extraer la primera hora de los horarios existentes o usar 8:00 por defecto
+    val horaInicial = medicamento?.horarios?.split(",")?.firstOrNull()?.trim()?.split(":")
+    var horaSeleccionada by remember {
+        mutableStateOf(horaInicial?.getOrNull(0)?.toIntOrNull() ?: 8)
+    }
+    var minutoSeleccionado by remember {
+        mutableStateOf(horaInicial?.getOrNull(1)?.toIntOrNull() ?: 0)
+    }
+
+    var mostrarTimePicker by remember { mutableStateOf(false) }
     var colorSeleccionado by remember {
         mutableStateOf(medicamento?.color ?: "#4CAF50")
     }
@@ -420,6 +429,7 @@ fun DialogoMedicamento(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
+                // Campo: Nombre del medicamento
                 item {
                     OutlinedTextField(
                         value = nombre,
@@ -433,12 +443,33 @@ fun DialogoMedicamento(
                     )
                 }
 
+                // Campo: Hora (con TimePicker)
+                item {
+                    OutlinedTextField(
+                        value = String.format("%02d:%02d", horaSeleccionada, minutoSeleccionado),
+                        onValueChange = { },
+                        label = { Text("Hora *") },
+                        leadingIcon = {
+                            Icon(Icons.Default.AccessTime, contentDescription = null)
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = { mostrarTimePicker = true }) {
+                                Icon(Icons.Default.Schedule, contentDescription = "Seleccionar hora")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        readOnly = true,
+                        singleLine = true
+                    )
+                }
+
+                // Campo: Dosis
                 item {
                     OutlinedTextField(
                         value = dosis,
                         onValueChange = { dosis = it },
                         label = { Text("Dosis *") },
-                        placeholder = { Text("Ej: 500mg, 2 tabletas") },
+                        placeholder = { Text("Ej: 500mg, 2 tabletas, 10ml") },
                         leadingIcon = {
                             Icon(Icons.Default.MedicalServices, contentDescription = null)
                         },
@@ -447,11 +478,12 @@ fun DialogoMedicamento(
                     )
                 }
 
+                // Campo: Descripción (opcional)
                 item {
                     OutlinedTextField(
                         value = descripcion,
                         onValueChange = { descripcion = it },
-                        label = { Text("Descripción") },
+                        label = { Text("Descripción (opcional)") },
                         placeholder = { Text("Para qué es este medicamento") },
                         leadingIcon = {
                             Icon(Icons.Default.Description, contentDescription = null)
@@ -461,39 +493,7 @@ fun DialogoMedicamento(
                     )
                 }
 
-                item {
-                    OutlinedTextField(
-                        value = frecuencia,
-                        onValueChange = { frecuencia = it },
-                        label = { Text("Frecuencia *") },
-                        placeholder = { Text("Ej: Cada 8 horas, 3 veces al día") },
-                        leadingIcon = {
-                            Icon(Icons.Default.Schedule, contentDescription = null)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                }
-
-                item {
-                    OutlinedTextField(
-                        value = horarios,
-                        onValueChange = { horarios = it },
-                        label = { Text("Horarios *") },
-                        placeholder = { Text("Ej: 08:00,14:00,20:00") },
-                        supportingText = {
-                            Text(
-                                "Separa los horarios con comas",
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(Icons.Default.AccessTime, contentDescription = null)
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
+                // Selector de color
                 item {
                     Text(
                         "Color identificador",
@@ -537,16 +537,16 @@ fun DialogoMedicamento(
         confirmButton = {
             Button(
                 onClick = {
-                    if (nombre.isNotBlank() && dosis.isNotBlank() &&
-                        frecuencia.isNotBlank() && horarios.isNotBlank()) {
+                    if (nombre.isNotBlank() && dosis.isNotBlank()) {
+                        val horarioFormateado = String.format("%02d:%02d", horaSeleccionada, minutoSeleccionado)
                         onGuardar(
                             ExpenseEntity(
                                 id = medicamento?.id ?: 0,
                                 nombre = nombre,
                                 descripcion = descripcion,
                                 dosis = dosis,
-                                frecuencia = frecuencia,
-                                horarios = horarios,
+                                frecuencia = "Diaria", // Valor por defecto
+                                horarios = horarioFormateado, // Solo un horario
                                 fechaInicio = medicamento?.fechaInicio ?: System.currentTimeMillis(),
                                 activo = medicamento?.activo ?: true,
                                 color = colorSeleccionado
@@ -554,10 +554,68 @@ fun DialogoMedicamento(
                         )
                     }
                 },
-                enabled = nombre.isNotBlank() && dosis.isNotBlank() &&
-                        frecuencia.isNotBlank() && horarios.isNotBlank()
+                enabled = nombre.isNotBlank() && dosis.isNotBlank()
             ) {
                 Text("Guardar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+
+    // TimePicker Dialog
+    if (mostrarTimePicker) {
+        TimePickerDialog(
+            horaInicial = horaSeleccionada,
+            minutoInicial = minutoSeleccionado,
+            onConfirm = { hora, minuto ->
+                horaSeleccionada = hora
+                minutoSeleccionado = minuto
+                mostrarTimePicker = false
+            },
+            onDismiss = { mostrarTimePicker = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialog(
+    horaInicial: Int,
+    minutoInicial: Int,
+    onConfirm: (Int, Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val timePickerState = rememberTimePickerState(
+        initialHour = horaInicial,
+        initialMinute = minutoInicial,
+        is24Hour = true
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                "Seleccionar hora",
+                style = MaterialTheme.typography.titleLarge
+            )
+        },
+        text = {
+            TimePicker(
+                state = timePickerState,
+                modifier = Modifier.padding(16.dp)
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(timePickerState.hour, timePickerState.minute)
+                }
+            ) {
+                Text("Aceptar")
             }
         },
         dismissButton = {
