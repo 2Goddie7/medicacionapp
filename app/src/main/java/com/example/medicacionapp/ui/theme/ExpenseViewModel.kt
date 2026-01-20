@@ -3,7 +3,7 @@ package com.example.medicacionapp.ui.theme
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.data.repository.ExpenseRepository
+import com.example.medicacionapp.data.repository.ExpenseRepository
 import com.example.medicacionapp.alarm.ReminderSchedule
 import com.example.medicacionapp.data.local.ExpenseEntity
 import kotlinx.coroutines.flow.MutableStateFlow
