@@ -45,14 +45,12 @@ class ReminderSchedule(private val context: Context) {
                 set(Calendar.SECOND, 0)
                 set(Calendar.MILLISECOND, 0)
 
-                // Si la hora ya pasó hoy, programar para mañana
                 if (timeInMillis <= System.currentTimeMillis()) {
                     add(Calendar.DAY_OF_MONTH, 1)
                 }
             }
 
             val intent = Intent(context, AlarmReceiver::class.java).apply {
-                // IMPORTANTE: Cambiar el action para que coincida con el AndroidManifest
                 action = "com.example.medicacionapp.MEDICAMENTO_ALARM"
                 putExtra("medicamento_nombre", medicamento.nombre)
                 putExtra("medicamento_dosis", medicamento.dosis)
@@ -67,23 +65,12 @@ class ReminderSchedule(private val context: Context) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
-            // IMPORTANTE: Usar setRepeating en lugar de setExactAndAllowWhileIdle para alarmas repetitivas
-            // setExactAndAllowWhileIdle es para alarmas únicas
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    calendario.timeInMillis,
-                    AlarmManager.INTERVAL_DAY, // Repetir cada 24 horas
-                    pendingIntent
-                )
-            } else {
-                alarmManager.setRepeating(
-                    AlarmManager.RTC_WAKEUP,
-                    calendario.timeInMillis,
-                    AlarmManager.INTERVAL_DAY,
-                    pendingIntent
-                )
-            }
+            // USA ESTO EN LUGAR DE setRepeating:
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                calendario.timeInMillis,
+                pendingIntent
+            )
 
         } catch (e: Exception) {
             e.printStackTrace()

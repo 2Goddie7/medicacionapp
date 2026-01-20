@@ -26,6 +26,7 @@ class AlarmReceiver : BroadcastReceiver() {
         val medicamentoDosis = intent.getStringExtra("medicamento_dosis") ?: ""
         val medicamentoId = intent.getLongExtra("medicamento_id", 0)
 
+
         crearCanalNotificacion(context)
         mostrarNotificacion(context, medicamentoNombre, medicamentoDosis, medicamentoId)
 
