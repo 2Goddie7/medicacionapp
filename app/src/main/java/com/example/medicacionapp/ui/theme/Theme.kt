@@ -1,6 +1,5 @@
 package com.example.medicacionapp.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -11,30 +10,34 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+private val EsquemaColorOscuro = darkColorScheme(
+    primary = AzulMedicoClaro,
+    secondary = VerdeMedicinaClaro,
+    tertiary = RojoAlertaClaro,
+    background = FondoOscuro,
+    surface = FondoTarjetaOscura,
+    onPrimary = TextoBlanco,
+    onSecondary = TextoBlanco,
+    onTertiary = TextoBlanco,
+    onBackground = TextoBlanco,
+    onSurface = TextoBlanco,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+private val EsquemaColorClaro = lightColorScheme(
+    primary = AzulMedico,
+    secondary = VerdeMedicina,
+    tertiary = RojoAlerta,
+    background = FondoClaro,
+    surface = FondoTarjeta,
+    onPrimary = TextoBlanco,
+    onSecondary = TextoBlanco,
+    onTertiary = TextoBlanco,
+    onBackground = TextoPrincipal,
+    onSurface = TextoPrincipal,
 )
 
 @Composable
-fun MedicacionappTheme(
+fun ExpenseTrackerTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
@@ -46,8 +49,8 @@ fun MedicacionappTheme(
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> EsquemaColorOscuro
+        else -> EsquemaColorClaro
     }
 
     MaterialTheme(
